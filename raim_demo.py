@@ -2,7 +2,7 @@ import streamlit as st
 import os
 
 st.set_page_config(
-    page_title="Redsand RAIM™",
+    page_title="Redsand RAIM™ Demo",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -15,7 +15,7 @@ with st.sidebar:
     else:
         st.warning("Logo not found. Place 'redsand_logo.png' in the same folder.")
     st.markdown("## **RAIM™: Redsand Demo Interface**")
-    st.markdown("Welcome to the simulation demo of Redsand's AI inference platform control system.")
+    st.markdown("Welcome to the simulation demo of Redsand's AI inference control system.")
     st.markdown("---")
     st.markdown("### RedBox Information")
     st.text("RedBox ID: RBX-9931-AIO")
@@ -59,7 +59,7 @@ else:
     st.success(f"Selected: {model_option}")
 
 # One Click Deploy
-st.header("2. One Click \"Deploy\"")
+st.header('2. One Click "Deploy"')
 if st.button("Deploy Now"):
     with st.spinner("Packaging and validating model..."):
         st.success("Model packaged successfully")
@@ -116,12 +116,22 @@ with col4:
     if st.button("Rollback"):
         st.info(f"Rolled back to {version_select}")
 
-# Model Scaling
+# Model Scaling and GPU Allocation
 st.header("9. Model Scaling")
-model_count = st.slider("Concurrent Models", 1, 10, 2)
+gpu_type = st.selectbox("Select GPU type:", ["L40S", "B200", "H100", "RTX 6000"])
+gpu_count = st.slider("Number of GPUs", 1, 8, 1)
+model_count = st.slider("Concurrent Models", 1, 20, 2)
 auto_scale = st.checkbox("Enable Auto-Scaling")
-if auto_scale:
-    st.success("Auto-scaling is active")
+
+max_models = gpu_count * 2
+st.info(f"With {gpu_count}x {gpu_type}, system supports up to {max_models} models concurrently.")
+
+if model_count > max_models:
+    st.warning("Model count exceeds available GPU capacity. Expect degraded performance.")
+else:
+    st.success("Current load is within GPU limits.")
+
+st.progress(min(model_count / max_models, 1.0))
 
 # RedBox Offline Mode and Hardware Stats
 st.header("10. RedBox Node Details")
@@ -162,4 +172,4 @@ with sec_expand:
     st.checkbox("Enable offline mode buffering with telemetry sync")
 
 st.markdown("---")
-st.caption("This is a high-level simulation for demo purposes. No real hardware is involved.")
+st.caption("This simulation is for illustrative purposes only and does not represent final performance or deployment conditions.")
