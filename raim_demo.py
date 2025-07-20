@@ -50,13 +50,18 @@ model_option = st.selectbox(
     ]
 )
 
-uploaded_model = None
-if model_option == "Upload your own":
-    uploaded_model = st.file_uploader("Upload a custom model file:", type=[".onnx", ".pt", ".h5"])
-    if uploaded_model:
-        st.success(f"Uploaded: {uploaded_model.name}")
+uploaded_files = st.file_uploader(
+    "Upload model weights and config files (if needed):",
+    type=[".pt", ".bin", ".json", ".h5", ".onnx", ".model"],
+    accept_multiple_files=True
+)
+
+if uploaded_files:
+    st.success(f"Uploaded {len(uploaded_files)} files:")
+    for f in uploaded_files:
+        st.write(f.name)
 else:
-    st.success(f"Selected: {model_option}")
+    st.info("No model files uploaded yet.")
 
 # One Click Deploy
 st.header('2. One Click "Deploy"')
@@ -118,8 +123,29 @@ with col4:
 
 # Model Scaling and GPU Allocation
 st.header("9. Model Scaling")
-gpu_type = st.selectbox("Select GPU type:", ["L40S", "B200", "H100", "RTX 6000"])
-gpu_count = st.slider("Number of GPUs", 1, 8, 1)
+st.markdown("**On-prem RedBox deployment – full GPU allocation only**")
+auto_select = st.checkbox("Auto-select hardware based on model")
+
+model_gpu_mapping = {
+    "LLaMA 3 70B": ("H100", 4),
+    "LLaMA 3 8B": ("A100", 2),
+    "Mistral 7B": ("L40S", 1),
+    "Mixtral 8x7B": ("H100", 4),
+    "Falcon 40B": ("H100", 3),
+    "Phi-2": ("L40S", 1),
+    "Gemma 2B": ("L40S", 1),
+    "Gemma 7B": ("L40S", 1),
+    "Command R": ("A100", 2),
+    "OpenChat": ("L40S", 1)
+}
+
+if auto_select and model_option in model_gpu_mapping:
+    gpu_type, gpu_count = model_gpu_mapping[model_option]
+    st.success(f"Auto-selected {gpu_count}x {gpu_type} based on {model_option}")
+else:
+    gpu_type = st.selectbox("Select GPU type:", ["L40S", "B200", "H100", "RTX 6000"], index=0)
+    gpu_count = st.slider("Number of GPUs", 1, 8, 1)
+
 model_count = st.slider("Concurrent Models", 1, 20, 2)
 auto_scale = st.checkbox("Enable Auto-Scaling")
 
