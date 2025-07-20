@@ -2,7 +2,7 @@ import streamlit as st
 import os
 
 st.set_page_config(
-    page_title="Redsand RAIM™ Demo",
+    page_title="Redsand RAIM™",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -15,7 +15,7 @@ with st.sidebar:
     else:
         st.warning("Logo not found. Place 'redsand_logo.png' in the same folder.")
     st.markdown("## **RAIM™: Redsand Demo Interface**")
-    st.markdown("Welcome to the simulation demo of Redsand's AI inference control system.")
+    st.markdown("Welcome to the simulation demo of Redsand's AI inference platform control system.")
     st.markdown("---")
     st.markdown("### RedBox Information")
     st.text("RedBox ID: RBX-9931-AIO")
