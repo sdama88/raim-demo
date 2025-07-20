@@ -59,7 +59,7 @@ else:
     st.success(f"Selected: {model_option}")
 
 # One Click Deploy
-st.header("2. One Click "Deploy"")
+st.header("2. One Click \"Deploy\"")
 if st.button("Deploy Now"):
     with st.spinner("Packaging and validating model..."):
         st.success("Model packaged successfully")
