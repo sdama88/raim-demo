@@ -8,24 +8,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Sidebar Branding ---
-with st.sidebar:
-    if os.path.exists("redsand_logo.png"):
-        st.image("redsand_logo.png", width=180)
-    else:
-        st.warning("Logo not found. Place 'redsand_logo.png' in the same folder.")
-    st.markdown("## **RAIM™: Redsand Demo Interface**")
-    st.markdown("Welcome to the simulation demo of Redsand's AI inference control system.")
-    st.markdown("---")
-    st.markdown("### RedBox Information")
-    st.text("RedBox ID: RBX-9931-AIO")
-    st.text("Location: London Edge Site")
-    st.text("Specs: 8x L40S (48GB, 300W) | 1x AMD EPYC (96-core)")
-    st.text("RAM: 1.5TB DDR5 ECC")
-    st.text("Storage: 4x 3.84TB NVMe + 2x 16TB SATA SSD")
-    st.text("Network: 2x 100GbE uplinks + 1x 1GbE Mgmt port")
-    st.text("Uptime: 123 days")
-
 # --- RedBox Configuration Selection ---
 st.subheader("Select RedBox Configuration")
 redbox_option = st.selectbox(
@@ -37,6 +19,22 @@ redbox_option = st.selectbox(
         "Custom (coming soon)"
     ]
 )
+
+# Extract GPU details dynamically
+gpu_info = redbox_option.split("-")[1].strip()
+
+# --- Sidebar Branding ---
+with st.sidebar:
+    if os.path.exists("redsand_logo.png"):
+        st.image("redsand_logo.png", width=180)
+    else:
+        st.warning("Logo not found. Place 'redsand_logo.png' in the same folder.")
+    st.markdown("## **RAIM™: Redsand Demo Interface**")
+    st.markdown("Welcome to the simulation demo of Redsand's AI inference control system.")
+    st.markdown("---")
+    st.markdown("### RedBox Information")
+    st.text(f"GPUs: {gpu_info}")
+
 st.markdown(f"**Selected Configuration:** {redbox_option}")
 
 # --- Title with Branding ---
@@ -145,6 +143,9 @@ with col4:
 st.header("9. Model Scaling")
 st.markdown("**On-prem RedBox deployment – full GPU allocation only**")
 auto_select = st.checkbox("Auto-select hardware based on model")
+
+default_gpu_type = "L40S"
+default_gpu_count = 8
 
 model_gpu_mapping = {
     "LLaMA 3 70B": ("H100", 4),
