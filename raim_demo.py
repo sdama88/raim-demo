@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import random
 
 st.set_page_config(
     page_title="Redsand RAIM™ Demo",
@@ -103,9 +104,18 @@ st.success("Environment ready")
 
 # Live Status Dashboard
 st.header("4. Live Status Dashboard")
-st.metric("Latency (ms)", "21.3")
-st.metric("Health Status", "Healthy")
-st.metric("Version", "v1.2.0")
+base_latency = {
+    "L40S": 21.3,
+    "H100": 15.7
+}
+
+latency = base_latency.get(gpu_type, 25.0) + random.uniform(-2.5, 2.5)
+health_status = "Healthy" if random.random() > 0.1 else "Degraded"
+version = "v1.2.0"
+
+st.metric("Latency (ms)", f"{latency:.1f}")
+st.metric("Health Status", health_status)
+st.metric("Version", version)
 
 # Integrate Monitoring
 st.header("5. Integrate Monitoring")
@@ -204,12 +214,13 @@ with expand:
         st.error("Node is currently offline. Telemetry paused.")
     else:
         st.success("Node online and responsive.")
-        st.metric("GPU Temperature (°C)", "63.4")
-        st.metric("Fan Speed (%)", "71")
-        st.metric("Power Usage (W)", "276")
-        st.metric("Disk Usage", "82%")
-        st.metric("CPU Load", "41.8%")
-        st.metric("Memory Usage", "24.7 GB / 32 GB")
+        base_temp = 63 if gpu_type == "L40S" else 58
+        st.metric("GPU Temperature (°C)", f"{base_temp + random.uniform(-2, 3):.1f}")
+        st.metric("Fan Speed (%)", f"{random.randint(60, 80)}")
+        st.metric("Power Usage (W)", f"{random.randint(250, 400)}")
+        st.metric("Disk Usage", f"{random.randint(70, 90)}%")
+        st.metric("CPU Load", f"{random.uniform(35, 55):.1f}%")
+        st.metric("Memory Usage", f"{random.uniform(22, 26):.1f} GB / 32 GB")
 
 # Security and Integration (Seldon-Aligned)
 st.header("11. Security & Integration")
