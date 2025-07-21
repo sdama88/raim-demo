@@ -100,7 +100,7 @@ if st.button("Deploy Now"):
 # Automatic Provisioning
 st.header("3. Automatic Provisioning")
 st.write("Spinning up runtime environment...")
-st.code(f"Allocated: {gpu_count}x {gpu_type} | 1x AMD EPYC (96-core) | 1.5TB DDR5 ECC RAM | 4x NVMe + 2x SATA SSD")
+st.code(f"Allocated: {gpu_count}x {gpu_type}")
 st.success("Environment ready")
 
 # Live Status Dashboard
