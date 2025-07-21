@@ -26,6 +26,19 @@ with st.sidebar:
     st.text("Network: 2x 100GbE uplinks + 1x 1GbE Mgmt port")
     st.text("Uptime: 123 days")
 
+# --- RedBox Configuration Selection ---
+st.subheader("Select RedBox Configuration")
+redbox_option = st.selectbox(
+    "Choose RedBox Node:",
+    [
+        "RedBox One - 8x L40S",
+        "RedBox Max - 64x H100 SXM",
+        "RedBox Ultra - 360x H100 SXM",
+        "Custom (coming soon)"
+    ]
+)
+st.markdown(f"**Selected Configuration:** {redbox_option}")
+
 # --- Title with Branding ---
 st.markdown("<h1 style='color:#d03d3d;'>Redsand RAIM™ Demo</h1>", unsafe_allow_html=True)
 st.caption("Simulated walk-through for agentic model deployment and management at the edge.")
@@ -135,29 +148,36 @@ auto_select = st.checkbox("Auto-select hardware based on model")
 
 model_gpu_mapping = {
     "LLaMA 3 70B": ("H100", 4),
-    "LLaMA 3 8B": ("A100", 2),
     "Mistral 7B": ("L40S", 1),
     "Mixtral 8x7B": ("H100", 4),
     "Falcon 40B": ("H100", 3),
     "Phi-2": ("L40S", 1),
     "Gemma 2B": ("L40S", 1),
     "Gemma 7B": ("L40S", 1),
-    "Command R": ("A100", 2),
+    "Command R": ("L40S", 1),
     "OpenChat": ("L40S", 1),
     "LLaMA 2 7B": ("L40S", 1),
-    "LLaMA 2 13B": ("A100", 2)
+    "LLaMA 2 13B": ("H100", 2),
+    "LLaMA 3 8B": ("L40S", 1),
+    "Qwen 14B": ("H100", 2),
+    "Command-R 35B": ("H100", 4),
+    "Whisper Large-v2": ("L40S", 1)
 }
 
-default_gpu_type = "L40S"
-default_gpu_count = 8
+def is_model_supported_on_redbox(model, redbox):
+    h100_required = model_gpu_mapping.get(model, ("", 0))[0] == "H100"
+    redbox_is_l40s = "RedBox One" in redbox
+    return not (h100_required and redbox_is_l40s)
 
 if auto_select and model_option in model_gpu_mapping:
     gpu_type, gpu_count = model_gpu_mapping[model_option]
     st.success(f"Auto-selected {gpu_count}x {gpu_type} based on {model_option}")
 else:
     st.info(f"No model selected or auto-selection disabled. Using default hardware: {default_gpu_count}x {default_gpu_type}")
-    gpu_type = st.selectbox("Select GPU type:", ["L40S", "B200", "H100", "RTX 6000"], index=0)
-    gpu_count = st.slider("Number of GPUs", 1, 8, value=default_gpu_count)
+    gpu_type = "L40S"
+    st.text("GPU Type: L40S")
+    gpu_count = default_gpu_count
+    st.text(f"GPU Count: {gpu_count}")
 
 model_count = st.slider("Concurrent Models", 1, 20, 2)
 auto_scale = st.checkbox("Enable Auto-Scaling")
@@ -169,6 +189,11 @@ if model_count > max_models:
     st.warning("Model count exceeds available GPU capacity. Expect degraded performance.")
 else:
     st.success("Current load is within GPU limits.")
+
+if not is_model_supported_on_redbox(model_option, redbox_option):
+    st.error(f"Warning: {model_option} requires H100 GPUs and is not supported on {redbox_option}.")
+
+st.progress(min(model_count / max_models, 1.0))
 
 st.progress(min(model_count / max_models, 1.0))
 
