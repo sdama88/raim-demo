@@ -144,8 +144,8 @@ st.header("9. Model Scaling")
 st.markdown("**On-prem RedBox deployment – full GPU allocation only**")
 auto_select = st.checkbox("Auto-select hardware based on model")
 
-default_gpu_type = "L40S"
-default_gpu_count = 8
+default_gpu_type = gpu_info.split()[1]
+default_gpu_count = int(gpu_info.split()[0].replace('x', ''))8
 
 model_gpu_mapping = {
     "LLaMA 3 70B": ("H100", 4),
@@ -174,10 +174,9 @@ if auto_select and model_option in model_gpu_mapping:
     gpu_type, gpu_count = model_gpu_mapping[model_option]
     st.success(f"Auto-selected {gpu_count}x {gpu_type} based on {model_option}")
 else:
-    st.info(f"No model selected or auto-selection disabled. Using default hardware: {default_gpu_count}x {default_gpu_type}")
-    gpu_type = "L40S"
-    st.text("GPU Type: L40S")
+    gpu_type = default_gpu_type
     gpu_count = default_gpu_count
+    st.info(f"Using selected RedBox configuration: {gpu_count}x {gpu_type}")
     st.text(f"GPU Count: {gpu_count}")
 
 model_count = st.slider("Concurrent Models", 1, 20, 2)
