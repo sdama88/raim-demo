@@ -55,7 +55,7 @@ model_option = st.selectbox(
         "Upload your own"
     ]
 )
-)
+
 
 uploaded_files = st.file_uploader(
     "Upload model weights and config files (if needed):",
