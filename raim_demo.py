@@ -145,7 +145,7 @@ st.markdown("**On-prem RedBox deployment – full GPU allocation only**")
 auto_select = st.checkbox("Auto-select hardware based on model")
 
 default_gpu_type = gpu_info.split()[1]
-default_gpu_count = int(gpu_info.split()[0].replace('x', ''))8
+default_gpu_count = int(gpu_info.split()[0].replace('x', ''))
 
 model_gpu_mapping = {
     "LLaMA 3 70B": ("H100", 4),
