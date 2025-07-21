@@ -37,6 +37,15 @@ with st.sidebar:
 
 st.markdown(f"**Selected Configuration:** {redbox_option}")
 
+# Extract GPU details from RedBox selection
+gpu_info = redbox_option.split("-")[-1].strip()
+default_gpu_type = gpu_info.split()[1]
+default_gpu_count = int(gpu_info.split()[0].replace("x", ""))
+
+# Default RedBox provisioning
+gpu_type = default_gpu_type
+gpu_count = default_gpu_count
+
 # --- Title with Branding ---
 st.markdown("<h1 style='color:#d03d3d;'>Redsand RAIM™ Demo</h1>", unsafe_allow_html=True)
 st.caption("Simulated walk-through for agentic model deployment and management at the edge.")
