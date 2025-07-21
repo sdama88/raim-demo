@@ -15,8 +15,7 @@ redbox_option = st.selectbox(
     [
         "RedBox One - 8x L40S",
         "RedBox Max - 64x H100 SXM",
-        "RedBox Ultra - 360x H100 SXM",
-        "Custom (coming soon)"
+        "RedBox Ultra - 360x H100 SXM"      
     ]
 )
 
@@ -30,7 +29,7 @@ with st.sidebar:
     else:
         st.warning("Logo not found. Place 'redsand_logo.png' in the same folder.")
     st.markdown("## **RAIM™: Redsand Demo Interface**")
-    st.markdown("Welcome to the simulation demo of Redsand's AI inference control system.")
+    st.markdown("Welcome to the simulation demo of Redsand's AI Inference Platform control system.")
     st.markdown("---")
     st.markdown("### RedBox Information")
     st.text(f"GPUs: {gpu_info}")
@@ -75,7 +74,6 @@ model_option = st.selectbox(
         "Upload your own"
     ]
 )
-
 
 uploaded_files = st.file_uploader(
     "Upload model weights and config files (if needed):",
@@ -148,7 +146,7 @@ with col4:
     if st.button("Rollback"):
         st.info(f"Rolled back to {version_select}")
 
-# Model Scaling and GPU Allocation
+# Model Scaling
 st.header("9. Model Scaling")
 st.markdown("**On-prem RedBox deployment – full GPU allocation only**")
 auto_select = st.checkbox("Auto-select hardware based on model")
@@ -177,37 +175,23 @@ def is_model_supported_on_redbox(model, redbox):
     return not (h100_required and redbox_is_l40s)
 
 if auto_select and model_option in model_gpu_mapping:
-    optimal_gpu_type, optimal_gpu_count, optimal_qps = model_gpu_mapping[model_option]
+    optimal_gpu_type, optimal_gpu_count, _ = model_gpu_mapping[model_option]
     if optimal_gpu_type != default_gpu_type:
         st.warning(f"Model {model_option} is typically optimal on {optimal_gpu_count}x {optimal_gpu_type}, but using selected RedBox: {default_gpu_count}x {default_gpu_type}")
     gpu_type = default_gpu_type
     gpu_count = default_gpu_count
-    qps_per_model = optimal_qps
 else:
     gpu_type = default_gpu_type
     gpu_count = default_gpu_count
-    qps_per_model = 200
     st.info(f"Using selected RedBox configuration: {gpu_count}x {gpu_type}")
 
-model_count = st.slider("Concurrent Models", 1, 20, 2)
-auto_scale = st.checkbox("Enable Auto-Scaling")
-
+model_count = st.slider("Concurrent Model Instances", 1, 20, 2)
 max_models = gpu_count * 2
-total_qps = model_count * qps_per_model
 
 if model_count > max_models:
     st.warning("Model count exceeds available GPU capacity. Expect degraded performance.")
 else:
     st.success("Current load is within GPU limits.")
-
-# Define QPS caps for RedBox tiers
-qps_cap = 200 * gpu_count
-st.metric("Estimated Total QPS", f"{total_qps}")
-
-if total_qps > qps_cap:
-    st.error(f"⚠️ QPS exceeds RedBox capacity ({qps_cap}). Expect latency.")
-else:
-    st.success(f"✔️ Within RedBox capacity ({qps_cap})")
 
 st.progress(min(model_count / max_models, 1.0))
 
