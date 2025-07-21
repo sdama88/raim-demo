@@ -171,11 +171,15 @@ def is_model_supported_on_redbox(model, redbox):
     return not (h100_required and redbox_is_l40s)
 
 if auto_select and model_option in model_gpu_mapping:
-    gpu_type, gpu_count = model_gpu_mapping[model_option]
-    st.success(f"Auto-selected {gpu_count}x {gpu_type} based on {model_option}")
+    optimal_gpu_type, optimal_gpu_count = model_gpu_mapping[model_option]
+    if optimal_gpu_type != default_gpu_type:
+        st.warning(f"Model {model_option} is typically optimal on {optimal_gpu_count}x {optimal_gpu_type}, but using selected RedBox: {default_gpu_count}x {default_gpu_type}")
+    gpu_type = default_gpu_type
+    gpu_count = default_gpu_count
 else:
     gpu_type = default_gpu_type
     gpu_count = default_gpu_count
+    st.info(f"Using selected RedBox configuration: {gpu_count}x {gpu_type}")
     st.info(f"Using selected RedBox configuration: {gpu_count}x {gpu_type}")
     st.text(f"GPU Count: {gpu_count}")
 
