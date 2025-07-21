@@ -15,7 +15,8 @@ redbox_option = st.selectbox(
     [
         "RedBox One - 8x L40S",
         "RedBox Max - 64x H100 SXM",
-        "RedBox Ultra - 360x H100 SXM" 
+        "RedBox Ultra - 360x H100 SXM",
+        "Custom (coming soon)"
     ]
 )
 
@@ -152,25 +153,22 @@ st.header("9. Model Scaling")
 st.markdown("**On-prem RedBox deployment – full GPU allocation only**")
 auto_select = st.checkbox("Auto-select hardware based on model")
 
-default_gpu_type = gpu_info.split()[1]
-default_gpu_count = int(gpu_info.split()[0].replace('x', ''))
-
 model_gpu_mapping = {
-    "LLaMA 3 70B": ("H100", 4),
-    "Mistral 7B": ("L40S", 1),
-    "Mixtral 8x7B": ("H100", 4),
-    "Falcon 40B": ("H100", 3),
-    "Phi-2": ("L40S", 1),
-    "Gemma 2B": ("L40S", 1),
-    "Gemma 7B": ("L40S", 1),
-    "Command R": ("L40S", 1),
-    "OpenChat": ("L40S", 1),
-    "LLaMA 2 7B": ("L40S", 1),
-    "LLaMA 2 13B": ("H100", 2),
-    "LLaMA 3 8B": ("L40S", 1),
-    "Qwen 14B": ("H100", 2),
-    "Command-R 35B": ("H100", 4),
-    "Whisper Large-v2": ("L40S", 1)
+    "LLaMA 3 70B": ("H100", 4, 3),
+    "Mistral 7B": ("L40S", 1, 200),
+    "Mixtral 8x7B": ("H100", 4, 96),
+    "Falcon 40B": ("H100", 3, 96),
+    "Phi-2": ("L40S", 1, 200),
+    "Gemma 2B": ("L40S", 1, 200),
+    "Gemma 7B": ("L40S", 1, 200),
+    "Command R": ("L40S", 1, 12),
+    "OpenChat": ("L40S", 1, 200),
+    "LLaMA 2 7B": ("L40S", 1, 200),
+    "LLaMA 2 13B": ("H100", 2, 144),
+    "LLaMA 3 8B": ("L40S", 1, 200),
+    "Qwen 14B": ("H100", 2, 144),
+    "Command-R 35B": ("H100", 4, 12),
+    "Whisper Large-v2": ("L40S", 1, 400)
 }
 
 def is_model_supported_on_redbox(model, redbox):
@@ -179,33 +177,37 @@ def is_model_supported_on_redbox(model, redbox):
     return not (h100_required and redbox_is_l40s)
 
 if auto_select and model_option in model_gpu_mapping:
-    optimal_gpu_type, optimal_gpu_count = model_gpu_mapping[model_option]
+    optimal_gpu_type, optimal_gpu_count, optimal_qps = model_gpu_mapping[model_option]
     if optimal_gpu_type != default_gpu_type:
         st.warning(f"Model {model_option} is typically optimal on {optimal_gpu_count}x {optimal_gpu_type}, but using selected RedBox: {default_gpu_count}x {default_gpu_type}")
     gpu_type = default_gpu_type
     gpu_count = default_gpu_count
+    qps_per_model = optimal_qps
 else:
     gpu_type = default_gpu_type
     gpu_count = default_gpu_count
+    qps_per_model = 200
     st.info(f"Using selected RedBox configuration: {gpu_count}x {gpu_type}")
-    st.info(f"Using selected RedBox configuration: {gpu_count}x {gpu_type}")
-    st.text(f"GPU Count: {gpu_count}")
 
 model_count = st.slider("Concurrent Models", 1, 20, 2)
 auto_scale = st.checkbox("Enable Auto-Scaling")
 
 max_models = gpu_count * 2
-st.info(f"With {gpu_count}x {gpu_type}, system supports up to {max_models} models concurrently.")
+total_qps = model_count * qps_per_model
 
 if model_count > max_models:
     st.warning("Model count exceeds available GPU capacity. Expect degraded performance.")
 else:
     st.success("Current load is within GPU limits.")
 
-if not is_model_supported_on_redbox(model_option, redbox_option):
-    st.error(f"Warning: {model_option} requires H100 GPUs and is not supported on {redbox_option}.")
+# Define QPS caps for RedBox tiers
+qps_cap = 200 * gpu_count
+st.metric("Estimated Total QPS", f"{total_qps}")
 
-st.progress(min(model_count / max_models, 1.0))
+if total_qps > qps_cap:
+    st.error(f"⚠️ QPS exceeds RedBox capacity ({qps_cap}). Expect latency.")
+else:
+    st.success(f"✔️ Within RedBox capacity ({qps_cap})")
 
 st.progress(min(model_count / max_models, 1.0))
 
