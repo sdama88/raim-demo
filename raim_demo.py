@@ -15,8 +15,7 @@ redbox_option = st.selectbox(
     [
         "RedBox One - 8x L40S",
         "RedBox Max - 64x H100 SXM",
-        "RedBox Ultra - 360x H100 SXM",
-        "Custom (coming soon)"
+        "RedBox Ultra - 360x H100 SXM" 
     ]
 )
 
