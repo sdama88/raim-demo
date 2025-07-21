@@ -20,7 +20,10 @@ with st.sidebar:
     st.markdown("### RedBox Information")
     st.text("RedBox ID: RBX-9931-AIO")
     st.text("Location: London Edge Site")
-    st.text("Specs: 1x L40S | 32GB RAM | 200GB SSD")
+    st.text("Specs: 8x L40S (48GB, 300W) | 1x AMD EPYC (96-core)")
+    st.text("RAM: 1.5TB DDR5 ECC")
+    st.text("Storage: 4x 3.84TB NVMe + 2x 16TB SATA SSD")
+    st.text("Network: 2x 100GbE uplinks + 1x 1GbE Mgmt port")
     st.text("Uptime: 123 days")
 
 # --- Title with Branding ---
@@ -45,9 +48,13 @@ model_option = st.selectbox(
         "OpenChat",
         "Gemma 2B",
         "Gemma 7B",
+        "Qwen 14B",
+        "Command-R 35B",
+        "Whisper Large-v2",
         "CustomVision",
         "Upload your own"
     ]
+)
 )
 
 uploaded_files = st.file_uploader(
@@ -73,7 +80,7 @@ if st.button("Deploy Now"):
 # Automatic Provisioning
 st.header("3. Automatic Provisioning")
 st.write("Spinning up runtime environment...")
-st.code("Allocated: 1x L40S | 32GB RAM | 200GB Storage")
+st.code("Allocated: 8x L40S (48GB, 300W) | 1x AMD EPYC (96-core) | 1.5TB DDR5 ECC RAM | 4x NVMe + 2x SATA SSD")
 st.success("Environment ready")
 
 # Live Status Dashboard
@@ -136,15 +143,21 @@ model_gpu_mapping = {
     "Gemma 2B": ("L40S", 1),
     "Gemma 7B": ("L40S", 1),
     "Command R": ("A100", 2),
-    "OpenChat": ("L40S", 1)
+    "OpenChat": ("L40S", 1),
+    "LLaMA 2 7B": ("L40S", 1),
+    "LLaMA 2 13B": ("A100", 2)
 }
+
+default_gpu_type = "L40S"
+default_gpu_count = 8
 
 if auto_select and model_option in model_gpu_mapping:
     gpu_type, gpu_count = model_gpu_mapping[model_option]
     st.success(f"Auto-selected {gpu_count}x {gpu_type} based on {model_option}")
 else:
+    st.info(f"No model selected or auto-selection disabled. Using default hardware: {default_gpu_count}x {default_gpu_type}")
     gpu_type = st.selectbox("Select GPU type:", ["L40S", "B200", "H100", "RTX 6000"], index=0)
-    gpu_count = st.slider("Number of GPUs", 1, 8, 1)
+    gpu_count = st.slider("Number of GPUs", 1, 8, value=default_gpu_count)
 
 model_count = st.slider("Concurrent Models", 1, 20, 2)
 auto_scale = st.checkbox("Enable Auto-Scaling")
